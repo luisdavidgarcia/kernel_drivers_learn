@@ -113,3 +113,77 @@ user_code -> read() -> /dev/ttyACM0 -> read() -> UART
 
 For example of these system calls serach and find `struct file_operations` here
 at this `fs.h` file from the linux: [fs.h](https://github.com/torvalds/linux/blob/master/include/linux/fs.h)
+
+
+## Kernel Files
+
+These files are located in `.ko` files and note you use C macros such as
+`module_init` and `module_exit`
+
+Here is the required Macro in the kernel file:
+
+```cpp
+MODULE_LICENSE();
+```
+
+The optional ones are 
+
+```cpp
+MODULE_AUTHOR();
+MODULE_DESCRIPTION();
+```
+
+To load, observer output, and remove kernel modules we can run these commands:
+
+1. Load: `sudo insmod [filename].ko`
+2. Observe: `sudo dmesg`
+3. Remove:  `sudo rmmod [filename].ko`
+
+Then to view information of the kernel driver:
+
+1. `modinfo [filename].ko`
+
+Another method to confirm if loaded/unloaded our kernel module or just to see
+which dependencies are other drivers are depending on since some drivers require
+others:
+
+1. `lsmod` (lists out the modules in use right now)
+
+This is the a great way to confirm if you modules were safelyu removed or 
+inserted inot the kernel.
+
+## What are these kernel functions doing
+
+1. `insmod`:
+    - calls `init_module` to hint the kernel that a module insertion is 
+      attempted
+    - Transfers control to the the kernel
+    - Kernel execute `sys_init_module`
+    - Verifies permissions
+    - `load_module` function is called
+        1. Check the sanityu of the .ko
+        1. creates the memory.
+        1. copies from user space to kernel space.
+        1. resolves sysmbols.
+        1. Returns a reference to the Kernel
+    - Adds the reference to a linked list that has all the loaded modules
+    - `module_init` listed function
+
+2. `rmmod`:
+    - calls `delete_module()` which hint sthe kernel that a module is to bre
+      removed
+        1. Control tranfed to the kernel.
+    - kernel exectures `sys_delete_module()`
+        1. Checks the permissions of the one requesting.
+        1. Checks if any other loaded modules needs teh current module.
+        1. Checks if the moudle is acutally loaded!
+        1. Execute the funciton provided in `module_exit`
+        1. `free_module()`
+            1. removes references and kernel object reference
+            1. performs any other cleanup.
+            1. unloads the module
+            1. Changes the sate in list
+            1. removes it from the list and free the memory
+
+3. `modinfo`:
+    - Basically provides the metadata for the loadable module
