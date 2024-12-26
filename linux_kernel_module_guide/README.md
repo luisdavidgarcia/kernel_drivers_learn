@@ -172,3 +172,26 @@ segmented so the kernel has it own memory segment and so does every other proces
 `copy_from_user` and `get_user` each use `put_user` and `get_user` respectively
 which only grab one char at a time. Anyways with these commamdns the kernel
 memory segment can access other memory segments.
+
+Another cool thing is we can also manage `/proc` with inodes instead of only the 
+`/proc` interface, but it requires us to be aware of permissions. With inodes
+now we only reference `file` type instead of manipulating a `file` itself.
+
+We also have access to `module_permission` funciton that decides access and lets 
+us determine what a process can do when it tries to do something with the 
+`/proc` file.
+
+Key Note: In the kernel, write = input and read = output and `procfs` is 
+starting to be phased out for `sysfs` instead
+
+Writing a `/proc` is quite complex, but to reduce that there is an API named 
+`seq_file` and has 3 functions: `start()`, `next()`, and `stop`. For the 
+diagram to see how all these functions interact to create a `/proc` file is
+seen below (click on it to see the source):
+
+[![Diagram of seq_file](https://sysprog21.github.io/lkmpg/lkmpg-for-ht1x.svg)](https://sysprog21.github.io/lkmpg/#manage-proc-file-with-standard-filesystem)
+
+For more informaiton on `seq_file` here are some resources:
+    - [https://lwn.net/Articles/22355/](https://lwn.net/Articles/22355/)
+    - [https://kernelnewbies.org/Documents/SeqFileHowTo](https://kernelnewbies.org/Documents/SeqFileHowTo)
+    - [fs/seq_file.c](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/seq_file.c)
