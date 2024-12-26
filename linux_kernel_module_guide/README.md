@@ -154,4 +154,21 @@ give a range of device numbers iwth `register_chrdev_region` or
 device numbers, but common practice is to embedded this structu in your own
 device specific struct.
 
-## 
+## The `/proc` File System
+
+In linux this file system is all virtualized and no where on disk. One of the
+concerns with `/dev` modules is that if the file was open and module was closed,
+we would not have been callend when the file is opened or closed so lots of 
+consequences and extra steps.
+
+All operations for `/proc` are in `proc_ops` structure defined in
+[`include/linux/proc_fs.h`](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/proc_fs.h).
+
+When writing the data comes from userspace so we often use `copy_from_user` or
+`get_user` that is one quirk of the `/proc` filesystem we must copy data from 
+userspace to kernel space. It necessary to do this since Linux memory is 
+segmented so the kernel has it own memory segment and so does every other process.
+
+`copy_from_user` and `get_user` each use `put_user` and `get_user` respectively
+which only grab one char at a time. Anyways with these commamdns the kernel
+memory segment can access other memory segments.
