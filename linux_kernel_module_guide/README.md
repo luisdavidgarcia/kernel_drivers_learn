@@ -195,3 +195,46 @@ For more informaiton on `seq_file` here are some resources:
     - [https://lwn.net/Articles/22355/](https://lwn.net/Articles/22355/)
     - [https://kernelnewbies.org/Documents/SeqFileHowTo](https://kernelnewbies.org/Documents/SeqFileHowTo)
     - [fs/seq_file.c](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/seq_file.c)
+
+## The `/sys` File System
+
+There is a growding shift for `sysfs` as it is more streamlined to have the
+kernel interact with userspace. So it's much better in regards for debugging
+and plus it has attribute based interface which makes it easy to export kobjects
+from regular files in the filesystesm
+
+Here is what attributes struct look like:
+
+```c
+struct attribute { 
+    char *name; 
+    struct module *owner; 
+    umode_t mode; 
+}; 
+ 
+int sysfs_create_file(struct kobject * kobj, const struct attribute * attr); 
+void sysfs_remove_file(struct kobject * kobj, const struct attribute * attr);
+```
+
+Also for `read()` and `write()` we typically use `show()` and `store()`.
+
+To learn more please take a look at these resources:
+    - [include/linux/sysfs.h](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/sysfs.h)
+    - [Documentation/driver-api/driver-model/driver.rst](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/driver-api/driver-model/driver.rst)
+    - [https://lwn.net/Articles/51437/](https://lwn.net/Articles/51437/)
+
+## `ioctl` Talking to Device Files
+
+Remember to send and communicate serially and talk to devices for embedded we
+needed to use `ioctl` which is a function in unix that has input output control.
+Here again read is to send infomration and write is to recieve to the kernel.
+Really this just let's us not interacte with devices via files, but now with its
+physical hardware.
+
+If you want to ioctls in your own kernel modules it best to recieve an 
+official ioctl assignment, for more info consult: 
+[Documentation/userspace-api/ioctl/ioctl-number.rst](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/userspace-api/ioctl/ioctl-number.rst)
+
+For concurrency we use atomic Compare-And-Swap (CAS) so shared resources here 
+don't lead to race conditions.
+
