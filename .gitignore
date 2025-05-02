@@ -1,1 +1,9 @@
 *.iso
+*.o.cmd
+*.ko
+*.o
+*.cmd
+*.symvers
+*.order
+*.mod
+*.mod.c
